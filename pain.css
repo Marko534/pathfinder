@@ -1,0 +1,36 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    height: 100%;
+}
+
+#grid-container {
+    flex: 1; /* This will make the grid container fill remaining space */
+    display: flex;
+    flex-wrap: wrap;
+    padding: 15px; /* Add padding for better spacing */
+}
+
+#input-container {
+    width: 200px; /* Adjust as needed */
+    padding: 10px; /* Add padding for better spacing */
+    box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+.row {
+    display: flex;
+    width: 100%; /* Ensure rows fill the width of the grid container */
+}
+
+.cell {
+    flex: 1; /* This will make each cell fill remaining space in the row */
+    border: 1px solid #000;
+    box-sizing: border-box;
+    background-color: #ccc; /* Add background color for better visibility */
+    aspect-ratio: 1; /* Maintain a square aspect ratio for each cell */
+}
