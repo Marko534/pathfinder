@@ -7,6 +7,8 @@ const CELL_VALUES = {
 };
 
 let selectedMode = "";
+let isMouseDown = false;
+
 // Initialize dark grid matrix
 let grid = [];
 
@@ -48,7 +50,16 @@ function generateGrid() {
       cell.classList.add("cell");
       cell.dataset.row = i; // Set row index as data attribute
       cell.dataset.col = j; // Set column index as data attribute
-      cell.addEventListener("click", paintCell); // Add click event listener
+      cell.addEventListener("mousedown", (event) => {
+        console.log("mousedown");
+        isMouseDown = true;
+        paintCell(event);
+      });
+      cell.addEventListener("mouseover", (event) => {
+        if (isMouseDown) {
+          paintCell(event);
+        }
+      });
 
       // Preserve existing cell color if available
       if (prevGrid[i] && prevGrid[i][j]) {
@@ -62,6 +73,10 @@ function generateGrid() {
     // Add row to grid container
     gridContainer.appendChild(row);
   }
+
+  document.addEventListener("mouseup", () => {
+    isMouseDown = false; // Set isMouseDown to false when mouse is released
+  });
 }
 
 function selectMode(mode) {
