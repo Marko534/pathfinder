@@ -1,21 +1,35 @@
+let ROWS;
+let COLUMNS;
+
 // Testing
 let count = 0;
 
+function getMatrixSize(matrix) {
+  return {
+    ROWS: matrix.length,
+    COLUMNS: matrix[0].length,
+  };
+}
+
 function printMatrix(matrix) {
+  let maxLength = 8;
+  // Print the matrix with formatted numbers
   for (let row of matrix) {
     let rowString = "";
     for (let val of row) {
-      rowString += val.toString().padStart(8) + "\t";
+      const formattedVal = val.toFixed(4).padStart(maxLength + 1);
+      rowString += formattedVal + " ";
     }
     console.log(rowString);
   }
+  console.log("\n");
 }
 
-function copy_values(values, size) {
+function copyValues(values) {
   let new_values = [];
-  for (let i = 0; i < size; i++) {
+  for (let i = 0; i < ROWS; i++) {
     new_values[i] = [];
-    for (let j = 0; j < size; j++) {
+    for (let j = 0; j < COLUMNS; j++) {
       new_values[i][j] = values[i][j];
     }
   }
@@ -23,13 +37,18 @@ function copy_values(values, size) {
 }
 
 // Checks to see if the previous and current value boards converge by a factor of 0.1%
-function converges(prev, curr, size) {
+function converges(prev, curr, converge_factor = 0.01) {
+  //This is for testing
   count++;
   console.log("Count loops ", count);
+  console.log("Prev Matrix");
   printMatrix(prev);
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      if (Math.abs(prev[i][j] - curr[i][j]) > 0.001) {
+  console.log("Curr Matrix");
+  printMatrix(curr);
+
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLUMNS; j++) {
+      if (Math.abs(prev[i][j] - curr[i][j]) > converge_factor) {
         return false;
       }
     }
@@ -38,21 +57,14 @@ function converges(prev, curr, size) {
 }
 
 // Calculates the next possible 8 moves and then sets values to the max of that move and policies to the direction of the max move
-function calc_next_moves(
-  curr_posn,
-  values,
-  policies,
-  power_cost,
-  discount,
-  size
-) {
+function calcNextMoves(curr_posn, values, policies, power_cost, discount) {
   // Determine if neighboring positions are in range of the map
   let s_range = true;
   let w_range = true;
   let n_range = true;
   let e_range = true;
 
-  if (curr_posn[0] + 1 > size - 1) {
+  if (curr_posn[0] + 1 > ROWS - 1) {
     s_range = false;
   }
   if (curr_posn[1] - 1 < 0) {
@@ -61,7 +73,7 @@ function calc_next_moves(
   if (curr_posn[0] - 1 < 0) {
     n_range = false;
   }
-  if (curr_posn[1] + 1 > size - 1) {
+  if (curr_posn[1] + 1 > COLUMNS - 1) {
     e_range = false;
   }
   let s_posn;
@@ -138,7 +150,8 @@ function calc_next_moves(
     0.1 * (-2 * power_cost + discount * values[s_posn[0]][s_posn[1]]);
 
   // Add all possible 8 moves to an list and find the move with the maximum utility
-  let moves = [s, w, n, e, ss, ww, nn, ee];
+  // let moves = [s, w, n, e, ss, ww, nn, ee];
+  let moves = [s, w, n, e];
   let max_val = Math.max(...moves);
   let max_move = moves.indexOf(max_val);
 
@@ -156,23 +169,22 @@ function calc_next_moves(
 // discount : the discount at each step in the operation (gamma value)
 // size : the n value for the nxn matrices provided by map, policies, and values
 // --> returns the utility value at the start position
-function drone_path_planner(
+function dronePathPlanner(
   map,
   policies,
   values,
   delivery_price,
   power_cost,
   drone_repair_cost,
-  discount,
-  size
+  discount
 ) {
   // Find Start, Goal, & Hazard Positions
-  let prev = copy_values(values, size);
+  let prev = copyValues(values);
   let start;
   let goal;
   let rivals = [];
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
+  for (let i = 0; i < ROWS; i++) {
+    for (let j = 0; j < COLUMNS; j++) {
       if (map[i][j] === 1) {
         start = [i, j];
       }
@@ -191,96 +203,91 @@ function drone_path_planner(
 
   // Loop Until Board Converges
   while (true) {
-    for (let i = 0; i < size; i++) {
-      for (let j = 0; j < size; j++) {
+    for (let i = 0; i < ROWS; i++) {
+      for (let j = 0; j < COLUMNS; j++) {
         let curr_posn = [i, j];
         // Posible error here
         if (
-          curr_posn[0] !== goal[0] ||
-          (curr_posn[1] !== goal[1] &&
-            !rivals.some(
-              (pos) => curr_posn[0] === pos[0] && curr_posn[1] === pos[1]
-            ))
+          (curr_posn[0] !== goal[0] || curr_posn[1] !== goal[1]) &&
+          !rivals.some(
+            (pos) => curr_posn[0] === pos[0] && curr_posn[1] === pos[1]
+          )
         ) {
-          calc_next_moves(
+          calcNextMoves(
             curr_posn,
             values, // Calculate the next moves for positions...
             policies,
             power_cost,
-            discount,
-            size
+            discount
           ); // ...that are not goal or hazard positions
         }
       }
     }
-    if (converges(prev, values, size)) {
+    if (converges(prev, values)) {
       // Stop looping and return if board converges
       break;
     } else {
       // Else, continue looping and keep track of previous values nxn matrix
-      prev = copy_values(values, size);
+      prev = copyValues(values);
     }
   }
   return values[start[0]][start[1]]; // Returns utility values at the start position
 }
 
-function test_drone_path_planner() {
-  // Sample map
+function testDronePathPlanner() {
+  // Sample map 1 start 2 end 3 hazard
   let sample_map = [
-    [1, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0],
+    [0, 0, 3, 0, 0, 0],
+    [1, 0, 3, 0, 2, 0],
+    [0, 0, 3, 0, 0, 0],
     [0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 2, 0],
     [0, 0, 0, 0, 0, 0],
   ];
   // Parameters
+  ({ ROWS, COLUMNS } = getMatrixSize(sample_map));
   let delivery_price = 100; // Utility earned for completing the robot delivery
   let power_cost = 10; // Cost of power by the robot at each step
-  let drone_repair_cost = 5000;
+  let drone_repair_cost = 500;
   let discount = 0.9; // Discount at each step in the operation (gamma value)
-  let size = 6; // Size of the map
 
   // Initialize policies and values matrices with zeros
   let policies = [];
   let values = [];
 
-  for (let i = 0; i < size; i++) {
+  for (let i = 0; i < ROWS; i++) {
     policies[i] = [];
-    // Initialize each value in the row to 0
-    for (let j = 0; j < size; j++) {
-      policies[i][j] = 0;
-    }
-  }
-
-  // Initialize values matrix with empty arrays for each row
-  for (let i = 0; i < size; i++) {
     values[i] = [];
     // Initialize each value in the row to 0
-    for (let j = 0; j < size; j++) {
+    for (let j = 0; j < COLUMNS; j++) {
+      policies[i][j] = 0;
       values[i][j] = 0;
     }
   }
 
-  // Run the drone_path_planner function
-  let utility_at_start = drone_path_planner(
+  // Run the dronePathPlanner function
+  let utilityAtStart = dronePathPlanner(
     sample_map,
     policies,
     values,
     delivery_price,
     power_cost,
     drone_repair_cost,
-    discount,
-    size
+    discount
   );
 
   // Assert the utility value at the start position
-  // assert utility_at_start == 0  // Adjust this value based on your expectations
-  console.log(policies);
+  // assert utilityAtStart == 0  // Adjust this value based on your expectations
+
+  console.log("\nPrintg the utility values at each position on the board");
 
   printMatrix(values);
+
+  printMatrix(policies);
+
   // Add more test cases as needed
 
   // Run the test case
 }
-test_drone_path_planner();
+
+testDronePathPlanner();
