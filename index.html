@@ -14,6 +14,17 @@
         <input type="number" id="rows" value="25" />
         <label for="cols">Columns:</label>
         <input type="number" id="cols" value="25" />
+        <label for="deliveryPrice">Delivery Price:</label>
+        <input type="number" id="deliveryPrice" value="100" />
+
+        <label for="powerCost">Power Cost:</label>
+        <input type="number" id="powerCost" value="10" />
+
+        <label for="repairCost">Drone Repair Cost:</label>
+        <input type="number" id="repairCost" value="500" />
+
+        <label for="discount">Discount (Gamma Value):</label>
+        <input type="number" id="discount" value="0.9" />
         <div id="grid-container">
           <button
             class="button draw-mode"
@@ -44,7 +55,12 @@
           >
             Finish
           </button>
-          <button class="button" onclick="toggleGrid()">Toggle Border</button>
+          <button class="button" id="toggleGrid" onclick="toggleGrid()">
+            Toggle Border
+          </button>
+          <button class="button" id="togglePath" onclick="togglePath()">
+            Generate path
+          </button>
         </div>
       </div>
     </div>

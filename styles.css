@@ -19,7 +19,7 @@ html {
 }
 
 #input-container {
-  width: 200px; /* Adjust as needed */
+  width: 250px; /* Adjust as needed */
   padding: 10px; /* Add padding for better spacing */
   box-sizing: border-box; /* Ensure padding is included in width */
 }
@@ -40,7 +40,7 @@ html {
   cursor: pointer;
 }
 
-.button.draw-mode.selected {
+.button.selected {
   background-color: #4caf50;
 }
 
@@ -58,13 +58,21 @@ html {
 
 /* Add this to your existing CSS */
 .cell.obstacle {
-  background-color: #000; /* Dark background color for dark cells */
+  background-color: #000;
+}
+
+.cell.path {
+  background-color: #4caf9e;
 }
 
 .cell.start {
-  background-color: green; /* Dark background color for dark cells */
+  background-color: green;
 }
 
 .cell.end {
-  background-color: red; /* Dark background color for dark cells */
+  background-color: red;
+}
+
+.cell.path-color {
+  background-color: #4caf9e;
 }
